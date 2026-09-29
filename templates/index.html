@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>NBA MVP Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f5f7;
+            color: #222;
+            margin: 0;
+            padding: 30px 15px;
+        }
+        .container { max-width: 1000px; margin: 0 auto; }
+        h1 { margin-bottom: 5px; }
+        .subtitle { color: #666; margin-top: 0; }
+
+        /* season/model dropdowns */
+        form {
+            background: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        select, button {
+            font-size: 15px;
+            padding: 6px 10px;
+            margin-left: 6px;
+        }
+        button {
+            background: #1d428a;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        /*  message boxes */
+        .note {
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .note.warn { background: #fff4d6; }
+        .note.good { background: #dff5e1; }
+        .note.bad { background: #fde3e3; }
+
+        /*   side by side tables */
+        .columns { display: flex; gap: 20px; flex-wrap: wrap; }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 15px 20px;
+            flex: 1;
+            min-width: 300px;
+        }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 8px 4px; border-bottom: 1px solid #eee; }
+        th { font-size: 13px; color: #666; }
+        .stats { color: #666; font-size: 13px; }
+        .hit { background: #eaf7ec; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>NBA MVP Predictor</h1>
+    <p class="subtitle">Predicted MVP race vs. the actual voting results</p>
+
+   
+    <form method="get">
+        <label>Season
+            <select name="season">
+                {% for s in seasons %}
+                <option value="{{ s }}" {% if s == season %}selected{% endif %}>
+                    {{ s - 1 }}-{{ s }}
+                </option>
+                {% endfor %}
+            </select>
+        </label>
+        <label>Model
+            <select name="model">
+                {% for m in model_names %}
+                <option value="{{ m }}" {% if m == model_name %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <button type="submit">Show</button>
+    </form>
+
+    <!-- warn for model training -->
+    {% if was_trained %}
+    <div class="note warn">
+        This season was part of the training data (1982-{{ train_end }}), so the model has
+        already seen the results. Pick a later season for a fair test.
+    </div>
+    {% endif %}
+
+    <!-- dingdingding correct mvp -->
+    {% if has_actual %}
+        {% if correct %}
+        <div class="note good">The model picked the correct MVP: {{ predicted[0].player }}.</div>
+        {% else %}
+        <div class="note bad">
+            The model picked {{ predicted[0].player }}, but the actual MVP was {{ actual[0].player }}.
+        </div>
+        {% endif %}
+    {% else %}
+    <div class="note warn">There are no MVP voting results for this season yet.</div>
+    {% endif %}
+
+    <div class="columns">
+        <!-- predicted top 5 -->
+        <div class="card">
+            <h2>Predicted top 5</h2>
+            <table>
+                <tr><th>#</th><th>Player</th><th>Predicted share</th></tr>
+                {% for p in predicted %}
+                <tr class="{% if p.in_actual %}hit{% endif %}">
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        {{ p.player }} ({{ p.team }})<br>
+                        <span class="stats">{{ p.pts }} pts / {{ p.trb }} reb / {{ p.ast }} ast</span>
+                    </td>
+                    <td>{{ p.share }}%</td>
+                </tr>
+                {% endfor %}
+            </table>
+            <p class="stats">Green rows finished in the actual top 5.</p>
+        </div>
+
+        <!-- actual top 5 -->
+        <div class="card">
+            <h2>Actual top 5</h2>
+            {% if has_actual %}
+            <table>
+                <tr><th>#</th><th>Player</th><th>Vote share</th></tr>
+                {% for p in actual %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>
+                        {{ p.player }} ({{ p.team }})<br>
+                        <span class="stats">{{ p.pts }} pts / {{ p.trb }} reb / {{ p.ast }} ast</span>
+                    </td>
+                    <td>{{ p.share }}%</td>
+                </tr>
+                {% endfor %}
+            </table>
+            {% else %}
+            <p class="stats">No results available.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</body>
+</html>
