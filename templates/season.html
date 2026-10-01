@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Season - NBA MVP Predictor{% endblock %}
+
+<!-- one table of 5 players (used for both the predicted and actual lists) -->
+{% macro ranking(rows, other_word) %}
+<table>
+    <tr><th>#</th><th>Player</th><th>Share</th><th>{{ other_word }} rank</th></tr>
+    {% for r in rows %}
+    <tr class="{{ r.status }}">
+        <td>{{ loop.index }}</td>
+        <td>{{ r.player }}</td>
+        <td>{{ r.share }}%</td>
+        <td>{% if r.other_rank %}{{ r.other_rank }}{% else %}-{% endif %}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endmacro %}
+
+{% block content %}
+<h1>Season</h1>
+
+<!-- box 1: pick a season and a model (the page reloads when you change either one) -->
+<form method="get" class="box controls">
+    <label>Season
+        <select name="season" onchange="this.form.submit()">
+            {% for s in seasons %}
+            <option value="{{ s }}" {% if s == season %}selected{% endif %}>{{ s - 1 }}&ndash;{{ s }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <label>Model
+        <select name="model" onchange="this.form.submit()">
+            {% for m in model_names %}
+            <option value="{{ m }}" {% if m == model_name %}selected{% endif %}>{{ m }}</option>
+            {% endfor %}
+        </select>
+    </label>
+</form>
+
+<!-- box 2: short summary of how the model did -->
+<div class="box">
+    <h2>Result</h2>
+    {% if result.has_actual %}
+    <table class="facts">
+        <tr>
+            <td>Predicted MVP</td>
+            <td>{{ result.predicted[0].player }}</td>
+        </tr>
+        <tr>
+            <td>Actual MVP</td>
+            <td>
+                {{ result.actual[0].player }}
+                {% if result.mvp_correct %}<span class="yes">(correct)</span>{% else %}<span class="no">(missed)</span>{% endif %}
+            </td>
+        </tr>
+        <tr>
+            <td>Top 5 accuracy</td>
+            <td>{{ result.overlap }} of {{ result.total }} predicted players made the actual top 5</td>
+        </tr>
+        <tr>
+            <td>Order accuracy</td>
+            <td>{{ result.exact }} of {{ result.total }} are in the exact right spot</td>
+        </tr>
+    </table>
+    {% else %}
+    <p class="muted">There are no MVP voting results for this season yet, so only the prediction is shown.</p>
+    {% endif %}
+
+    <!-- warn if the model already saw this season while training -->
+    {% if result.was_trained %}
+    <p class="muted small">
+        Note: this season was in the training data (1982&ndash;{{ train_end }}), so the model has
+        already seen the results. Pick {{ train_end + 1 }} or later for a fair test.
+    </p>
+    {% endif %}
+</div>
+
+<!-- boxes 3 and 4: predicted and actual lists side by side -->
+<div class="columns">
+    <div class="box">
+        <h2>Predicted</h2>
+        {{ ranking(result.predicted, "Actual") }}
+    </div>
+    <div class="box">
+        <h2>Actual</h2>
+        {% if result.has_actual %}
+            {{ ranking(result.actual, "Predicted") }}
+        {% else %}
+            <p class="muted">No results available.</p>
+        {% endif %}
+    </div>
+</div>
+
+{% if result.has_actual %}
+<p class="muted small">
+    <span class="yes">Green</span> = same player in the same spot.
+    <span style="color: var(--gold)">Gold</span> = in the top 5 but a different spot.
+</p>
+{% endif %}
+{% endblock %}
