@@ -5,19 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{% block title %}NBA MVP Predictor{% endblock %}</title>
 
-    <!-- the small icon in the browser tab (replace static/favicon.png with your headshot) -->
-    <link rel="icon" type="image/png" href="{{ url_for('static', filename='kyri.jpg') }}">
+
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='kyri.jpg') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body>
 
-<!-- top bar with the site name and the two page links -->
+
 <div class="top">
     <div class="top-inner">
-        <a class="site-name" href="{{ url_for('index') }}">NBA MVP Predictor</a>
+        <a class="site-name" href="{{ url_for('index') }}">
+            <img class="logo" src="{{ url_for('static', filename='kyri.jpg') }}" alt="">
+            <span>NBA <span class="accent">MVP</span> Predictor</span>
+        </a>
         <nav>
             <a href="{{ url_for('index') }}" class="{% if page == 'season' %}active{% endif %}">Season</a>
             <a href="{{ url_for('history') }}" class="{% if page == 'history' %}active{% endif %}">Multi-Year</a>
+            <a href="{{ url_for('testing') }}" class="{% if page == 'testing' %}active{% endif %}">Testing</a>
         </nav>
     </div>
 </div>
@@ -27,7 +34,7 @@
 </div>
 
 <div class="footer">
-    Data from Basketball Reference. Models trained on seasons up to {{ train_end }}.
+    Data from Basketball Reference.
 </div>
 
 </body>

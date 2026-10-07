@@ -5,7 +5,7 @@
 {% block content %}
 <h1>Multi-Year</h1>
 
-<!-- box 1: pick how many seasons to show and which model (the page reloads when you change either one) -->
+<!-- pick how many seasons to show and which model -->
 <form method="get" class="box controls">
     <label>Seasons
         <select name="years" onchange="this.form.submit()">
@@ -25,11 +25,11 @@
     </label>
 </form>
 
-<!-- box 2: one row per season -->
+<!-- one row per season -->
 <div class="box">
     <h2>MVP by season</h2>
-    <table>
-        <tr>
+    <table class="stack">
+        <tr class="head">
             <th>Season</th>
             <th>Predicted MVP</th>
             <th>Actual MVP</th>
@@ -40,13 +40,13 @@
         {% for r in results %}
         <tr>
             <td>
-                <a href="{{ url_for('index', season=r.season, model=model_name) }}">{{ r.season - 1 }}&ndash;{{ r.season }}</a>{% if r.was_trained %}*{% endif %}
+                <a href="{{ url_for('index', season=r.season, model=model_name) }}">{{ r.season - 1 }}&ndash;{{ r.season }}</a>
             </td>
-            <td>{{ r.predicted[0].player }}</td>
-            <td>{{ r.actual[0].player }}</td>
-            <td>{% if r.mvp_correct %}<span class="yes">Yes</span>{% else %}<span class="no">No</span>{% endif %}</td>
-            <td>{{ r.overlap }}/{{ r.total }}</td>
-            <td>{{ r.exact }}/{{ r.total }}</td>
+            <td data-label="Predicted MVP">{{ r.predicted[0].player }}</td>
+            <td data-label="Actual MVP">{{ r.actual[0].player }}</td>
+            <td data-label="Correct">{% if r.mvp_correct %}<span class="yes">Yes</span>{% else %}<span class="no">No</span>{% endif %}</td>
+            <td data-label="Top 5">{{ r.overlap }}/{{ r.total }}</td>
+            <td data-label="Order">{{ r.exact }}/{{ r.total }}</td>
         </tr>
         {% endfor %}
     </table>
@@ -54,30 +54,29 @@
     <p class="muted small">
         Top 5 = predicted players who made the actual top 5. Order = players in the exact right spot.
         Click a season to see its full breakdown.
-        {% if summary %}Seasons marked * were in the training data and are not counted in the scores below.{% endif %}
     </p>
 </div>
 
-<!-- box 3: how each model did on the same seasons (only seasons it never trained on) -->
-{% if summary %}
+<!-- how each model did on the same seasons -->
 <div class="box">
     <h2>Model comparison</h2>
-    <table>
-        <tr>
+    <table class="stack">
+        <tr class="head">
             <th>Model</th>
             <th>MVP picked</th>
+            <th>In top 3</th>
             <th>Top 5</th>
             <th>Order</th>
         </tr>
         {% for c in comparison %}
         <tr>
             <td>{{ c.model }}</td>
-            <td>{{ c.summary.mvp_hits }} of {{ c.summary.seasons }} ({{ c.summary.mvp_pct }}%)</td>
-            <td>{{ c.summary.overlap_pct }}%</td>
-            <td>{{ c.summary.exact_pct }}%</td>
+            <td data-label="MVP picked">{{ c.summary.mvp_hits }} of {{ c.summary.seasons }} ({{ c.summary.mvp_pct }}%)</td>
+            <td data-label="In top 3">{{ c.summary.top3_pct }}%</td>
+            <td data-label="Top 5">{{ c.summary.overlap_pct }}%</td>
+            <td data-label="Order">{{ c.summary.exact_pct }}%</td>
         </tr>
         {% endfor %}
     </table>
 </div>
-{% endif %}
 {% endblock %}

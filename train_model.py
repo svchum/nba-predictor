@@ -1,5 +1,5 @@
 # trains random forest and gradient boosting models to predict nba mvp vote share
-# train on seasons 1982-2010, test on 2011 and later
+
 
 import os
 

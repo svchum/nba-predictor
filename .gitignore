@@ -1,3 +1,14 @@
-__pycache__/
-models/
+
 data/raw/
+
+
+models/
+
+
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+.vscode/
+.DS_Store
