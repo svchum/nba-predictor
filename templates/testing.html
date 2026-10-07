@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Testing - NBA MVP Predictor{% endblock %}
+
+{% block content %}
+<h1>Testing</h1>
+
+<div class="box">
+    <h2>How it was tested</h2>
+    <p>
+        The models were tested with cross validation leave-one-out training on every season in the data: {{ season_count }} seasons, from {{ first_season - 1 }}&ndash;{{ first_season }}
+        through {{ last_season - 1 }}&ndash;{{ last_season }}.
+    </p>
+</div>
+
+<!-- overall accuracy -->
+<div class="box">
+    <h2>Overall accuracy</h2>
+    <table class="stack">
+        <tr class="head">
+            <th>Model</th>
+            <th>MVP picked</th>
+            <th>In top 3</th>
+            <th>Top 5</th>
+            <th>Order</th>
+            <th>R&sup2;</th>
+        </tr>
+        {% for o in overall %}
+        <tr>
+            <td>{{ o.model }}</td>
+            <td data-label="MVP picked">{{ o.summary.mvp_hits }} of {{ o.summary.seasons }} ({{ o.summary.mvp_pct }}%)</td>
+            <td data-label="In top 3">{{ o.summary.top3_hits }} of {{ o.summary.seasons }} ({{ o.summary.top3_pct }}%)</td>
+            <td data-label="Top 5">{{ o.summary.overlap_pct }}%</td>
+            <td data-label="Order">{{ o.summary.exact_pct }}%</td>
+            <td data-label="R&sup2;">{{ o.summary.r2 }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    <p class="muted small">
+        MVP picked = the model's #1 was the real MVP. In top 3 = the real MVP was in the model's top 3.
+        Top 5 = predicted players who made the actual top 5. Order = players in the exact right spot.
+        R&sup2; = how closely predicted vote shares match real ones (1.0 is perfect).
+    </p>
+</div>
+
+<!-- where model missed the real mvp -->
+<div class="box">
+    <h2>Missed MVPs</h2>
+    <table class="stack">
+        <tr class="head">
+            <th>Season</th>
+            <th>Actual MVP</th>
+            {% for m in model_names %}<th>{{ m }} pick</th>{% endfor %}
+        </tr>
+        {% for miss in misses %}
+        <tr>
+            <td><a href="{{ url_for('index', season=miss.season) }}">{{ miss.season - 1 }}&ndash;{{ miss.season }}</a></td>
+            <td data-label="Actual MVP">{{ miss.actual }}</td>
+            {% for p in miss.picks %}
+            <td data-label="{{ model_names[loop.index0] }}" class="{% if p.correct %}yes{% else %}no{% endif %}">{{ p.player }}</td>
+            {% endfor %}
+        </tr>
+        {% endfor %}
+    </table>
+    <p class="muted small">Green = the model picked the real MVP. Red = it missed. Click a season to see its full breakdown.</p>
+</div>
+{% endblock %}

@@ -2,13 +2,13 @@
 
 {% block title %}Season - NBA MVP Predictor{% endblock %}
 
-<!-- one table of 5 players (used for both the predicted and actual lists) -->
+<!-- one table of 5 player-->
 {% macro ranking(rows, other_word) %}
 <table>
     <tr><th>#</th><th>Player</th><th>Share</th><th>{{ other_word }} rank</th></tr>
     {% for r in rows %}
     <tr class="{{ r.status }}">
-        <td>{{ loop.index }}</td>
+        <td class="rank">{{ loop.index }}</td>
         <td>{{ r.player }}</td>
         <td>{{ r.share }}%</td>
         <td>{% if r.other_rank %}{{ r.other_rank }}{% else %}-{% endif %}</td>
@@ -20,7 +20,7 @@
 {% block content %}
 <h1>Season</h1>
 
-<!-- box 1: pick a season and a model (the page reloads when you change either one) -->
+<!--  pick a season and a model-->
 <form method="get" class="box controls">
     <label>Season
         <select name="season" onchange="this.form.submit()">
@@ -38,7 +38,7 @@
     </label>
 </form>
 
-<!-- box 2: short summary of how the model did -->
+<!-- summary of how the model did -->
 <div class="box">
     <h2>Result</h2>
     {% if result.has_actual %}
@@ -66,17 +66,9 @@
     {% else %}
     <p class="muted">There are no MVP voting results for this season yet, so only the prediction is shown.</p>
     {% endif %}
-
-    <!-- warn if the model already saw this season while training -->
-    {% if result.was_trained %}
-    <p class="muted small">
-        Note: this season was in the training data (1982&ndash;{{ train_end }}), so the model has
-        already seen the results. Pick {{ train_end + 1 }} or later for a fair test.
-    </p>
-    {% endif %}
 </div>
 
-<!-- boxes 3 and 4: predicted and actual lists side by side -->
+<!-- predicted and actual lists -->
 <div class="columns">
     <div class="box">
         <h2>Predicted</h2>
@@ -95,7 +87,7 @@
 {% if result.has_actual %}
 <p class="muted small">
     <span class="yes">Green</span> = same player in the same spot.
-    <span style="color: var(--gold)">Gold</span> = in the top 5 but a different spot.
+    <span class="accent">Orange</span> = in the top 5 but a different spot.
 </p>
 {% endif %}
 {% endblock %}
